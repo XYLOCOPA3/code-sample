@@ -1,0 +1,23 @@
+{
+  "name": "hardhat-project",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "REPORT_GAS=true npx hardhat test",
+    "node": "npx hardhat node",
+    "predeploy": "npm run test",
+    "deploy": "npx hardhat run scripts/deploy.ts --network $npm_config_network",
+    "upgrade": "npx hardhat run scripts/upgrade.ts --network $npm_config_network",
+    "verify-impl": "npx hardhat verify $npm_config_contractaddress --network $npm_config_network --constructor-args arg-impl.ts",
+    "verify-beacon": "npx hardhat verify $npm_config_contractaddress --network $npm_config_network --constructor-args arg-beacon.ts --contract contracts/Beacon.sol:Beacon",
+    "verify-proxy": "npx hardhat verify $npm_config_contractaddress --network $npm_config_network --constructor-args arg-proxy.ts --contract contracts/MyContractProxy.sol:MyContractProxy"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "dotenv": "^16.0.3",
+    "hardhat": "^2.13.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.8.2",
+    "@openzeppelin/contracts-upgradeable": "^4.8.2"
+  }
+}
