@@ -1,38 +1,45 @@
-import { ethers } from "hardhat";
+import { ethers, upgrades, run } from "hardhat";
 
 async function main() {
   const [deployer] = await ethers.getSigners();
-
   console.log("Deploying contracts with the account:", deployer.address);
 
-  // Deploy the MyContract implementation contract
   const MyContract = await ethers.getContractFactory("MyContract");
-  const myContract = await MyContract.deploy();
-  await myContract.deployed();
-  console.log("MyContract implementation deployed to:", myContract.address);
-
-  // Deploy the Beacon with the MyContract implementation address
-  const Beacon = await ethers.getContractFactory("Beacon");
-  const beacon = await Beacon.deploy(myContract.address);
+  const beacon = await upgrades.deployBeacon(MyContract);
   await beacon.deployed();
   console.log("Beacon deployed to:", beacon.address);
-
-  // Encode the MyContract constructor call for initializing the proxy
-  const myContractInitializeData = myContract.interface.encodeFunctionData(
-    "initialize",
-    [42]
+  console.log(
+    "MyContract implementation deployed to:",
+    await upgrades.beacon.getImplementationAddress(beacon.address)
   );
 
-  // Deploy the MyContractProxy contract with the Beacon address and the constructor data
-  const MyContractProxy = await ethers.getContractFactory("MyContractProxy");
-  const myContractProxy = await MyContractProxy.deploy(
-    beacon.address,
-    myContractInitializeData
-  );
-  await myContractProxy.deployed();
-  console.log("MyContractProxy deployed to:", myContractProxy.address);
+  const beaconProxy1 = await upgrades.deployBeaconProxy(beacon, MyContract, [
+    42,
+  ]);
+  await beaconProxy1.deployed();
+  console.log("beaconProxy1 deployed to:", beaconProxy1.address);
+
+  const beaconProxy2 = await upgrades.deployBeaconProxy(beacon, MyContract, [
+    84,
+  ]);
+  await beaconProxy2.deployed();
+  console.log("beaconProxy2 deployed to:", beaconProxy2.address);
 
   console.log("Deployment finished.");
+
+  console.log("Verifying beaconProxy1...");
+  await run("verify:verify", {
+    address: beaconProxy1.address,
+    constructorArguments: [],
+  });
+
+  console.log("Verifying beaconProxy2...");
+  await run("verify:verify", {
+    address: beaconProxy2.address,
+    constructorArguments: [],
+  });
+
+  console.log("Verification done!");
 }
 
 main()
