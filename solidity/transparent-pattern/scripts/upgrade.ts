@@ -1,4 +1,4 @@
-import { ethers, upgrades } from "hardhat";
+import { ethers, upgrades, run } from "hardhat";
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -7,8 +7,20 @@ async function main() {
   const proxyAddress = "0x629BB3a9Ee209ae07db37720ebEf9E77938eeb03";
 
   const MyContractV2 = await ethers.getContractFactory("MyContractV2");
-  const myContract = await upgrades.upgradeProxy(proxyAddress, MyContractV2);
-  console.log("MyContract upgraded at:", myContract.address);
+  const myContractV2Proxy = await upgrades.upgradeProxy(
+    proxyAddress,
+    MyContractV2
+  );
+  await myContractV2Proxy.deployed();
+  console.log("Proxy upgraded at:", myContractV2Proxy.address);
+
+  console.log("Verifying uups...");
+  await run("verify:verify", {
+    address: myContractV2Proxy.address,
+    constructorArguments: [],
+  });
+
+  console.log("Verification done!");
 }
 
 main()

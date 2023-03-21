@@ -1,20 +1,23 @@
-import { ethers, upgrades } from "hardhat";
+import { ethers, upgrades, run } from "hardhat";
 
 async function main() {
   const [deployer] = await ethers.getSigners();
   console.log("Deploying contracts with the account:", deployer.address);
 
   const MyContract = await ethers.getContractFactory("MyContract");
-  const myContract = await upgrades.deployProxy(MyContract, [42], {
+  const myContractProxy = await upgrades.deployProxy(MyContract, [42], {
     initializer: "initialize",
   });
-  console.log("MyContract deployed to:", myContract.address);
+  await myContractProxy.deployed();
+  console.log("Proxy deployed to:", myContractProxy.address);
 
-  const proxyAddress = await upgrades.admin.getInstance();
-  console.log("TransparentUpgradeableProxy deployed to:", proxyAddress.address);
+  console.log("Verifying uups...");
+  await run("verify:verify", {
+    address: myContractProxy.address,
+    constructorArguments: [],
+  });
 
-  const initData = myContract.interface.encodeFunctionData("initialize", [42]);
-  console.log("Initial data for proxy:", initData);
+  console.log("Verification done!");
 }
 
 main()

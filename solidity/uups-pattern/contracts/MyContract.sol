@@ -8,6 +8,11 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 contract MyContract is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     uint256 public value;
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(uint256 _value) public initializer {
         __Ownable_init();
         __UUPSUpgradeable_init();

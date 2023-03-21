@@ -6,6 +6,7 @@
     "node": "npx hardhat node",
     "predeploy": "npm run test",
     "deploy": "npx hardhat run scripts/deploy.ts --network $npm_config_network",
+    "preupgrade": "npm run test",
     "upgrade": "npx hardhat run scripts/upgrade.ts --network $npm_config_network",
     "verify": "npx hardhat verify $npm_config_contractaddress --network $npm_config_network --constructor-args argument.ts"
   },
